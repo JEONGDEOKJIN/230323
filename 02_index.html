@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+
+    <style>
+
+        body {
+
+            padding: 0;
+            margin: 0;
+
+        }
+
+
+        .box {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            
+        }
+
+
+        .box-content {
+
+            position: absolute;
+            
+            /* 부모의 너비로❓❓❓❓❓ */
+            left: 100%;
+            width: 100%;
+            height: 100%;
+
+            opacity: 0;
+
+            background-color: aquamarine;
+
+            /* 변하는게 있으면, 1초동안 변하게 */
+            transition: 1s;
+        }
+
+        /* 이게 붙으면 > 슈슈슈슉슉 나옴  */
+        .is-active {
+
+            left: 0;
+            opacity: 1;
+
+        }
+
+
+        .big-box {
+
+            height: 120vh;
+            width: 100%;
+            background-color: lightsalmon;
+        }
+
+
+    </style>
+
+
+
+
+
+
+</head>
+<body>
+    
+
+<div class="big-box"> 
+
+
+
+</div>
+    <div class = "box">    
+            <div class="box-content"> </div>    
+    </div>
+     <div class = "box">   
+            <div class="box-content"> </div>    
+    </div>
+     <div class = "box">   
+            <div class="box-content"> </div>    
+    </div>
+     <div class = "box">   
+            <div class="box-content"> </div>    
+    </div>
+
+
+
+
+</body>
+
+
+
+
+
+<script>
+
+    let _boxContents = document.querySelectorAll('.box-content');
+    console.log(_boxContents)
+
+
+    // getBoundingClientRect
+        // '현재 태그의 사각면' 을 구할 수 있음. ⭐⭐⭐⭐⭐ 
+        // '반환된 객체값'이 top left bottom right 이렇게 있을 때 
+        // 우리는 top 이 필요
+        // 어떻게 top 값 가져와?
+        console.log(_boxContents[0].getBoundingClientRect().top);
+            // 윗면이 어디에 있는지 
+            // 현재 top 은 0 좌표에 있어 
+        console.log(_boxContents[0].getBoundingClientRect().bottom);
+            // bottom 은 500 위치 에 있어 
+        
+        console.log(_boxContents[0].getBoundingClientRect().top + window.pageYOffset);
+        console.log(_boxContents[1].getBoundingClientRect().top + window.pageYOffset);
+        console.log(_boxContents[2].getBoundingClientRect().top + window.pageYOffset);
+        console.log(_boxContents[3].getBoundingClientRect().top + window.pageYOffset);
+        // 맨 위에서 보면, 현재 브라우저 위치에서 보면, 마이너스, 가 나옴. 
+        // -900 위로 나온다. 
+        // 기준치 에서 위로 900 있다는 말
+        // SO, 진행에서 - 스크롤 값 더해주면 잘 나옴 
+            // /i.getBoundingClientRect().top + window.pageYOffset⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ 
+                // 이렇게 빼주면 > 음수가 안 나와 
+                // top 에서 진행된 값을 더해서 
+
+
+
+
+    // 초기화 
+    // 스크롤 값들을 정리 
+    let posY = [];
+    
+    function init() {
+
+        // 초기 셋팅
+            // top 의 값을 알아야 비교해서 애니메이션 할 수 있으니까 ⭐⭐⭐⭐⭐⭐ 
+            // 다만, 문제는 이미 스크롤이 되어 있을 대 
+                // 스크롤이 이미 되어 있으면 잘 안 나와
+        _boxContents.forEach(function(i) {
+
+            // top 의 값들을 모두 배열에 담아주고 
+            // 페이지에 접속되었을 때 스크롤ㄹ이 진행되어 있는 값 : window.pageYOffset
+
+            // 페이지 접속했을 때 
+            posY.push(i.getBoundingClientRect().top + window.pageYOffset);
+
+        })
+        // posY.push()
+    }
+
+    init();
+
+
+    // 이미 스크롤 되어 있는지확인 
+        // 페이지에 들어왔을 때 
+    // console.log(window.pageYOffset)
+
+
+
+    // 스크롤 했을 때~
+    window.onscroll = function() {
+
+        // 필요한게 브라우저의 Y 스크롤 값
+        // 진행된 스크롤 값 window.scrollY
+        // console.log("스크롤 되고 있나 확인")
+        console.log(window.scrollY);
+            // 지금은 0 기준임! 
+
+        // 페이지를 스크롤 하면서, 브라우저의 제일 밑단을 기준으로 바꾸려면? 
+        // 브라우저의 높이를 더해주면 > 제일 밑 단을 기준으로 바꿀 수 있음. 😥😥😥😥😥😥 
+        // 현재 브라우저의 크기를 더해주면 > '밑을 기준' 으로 할 수 있어 
+
+        // 브라우저 '높이' 구하려면
+        // window.innerHeight;
+
+        // 이 놈을 현재 진행되는 스크롤 값에 더해줄 것 임
+        // BOTTOM 을 기준으로 스크롤 값을 구할 수 있음. 
+        // console.log(window.scrollY + window.innerHeight)
+
+        // 스크롤 값은 bottom 기준으로 만들어둠.
+        let _scroll = window.scrollY + window.innerHeight;
+            // 스크롤이 진행된 값, 
+            // window.scrollY 여이것만 쓰면 > 다 내려가서 나와 
+            // window.scrollY + window.innerHeight /2 > 이렇게 하면 반절지나서 나와 
+            // bottom 기준으로 하려고 이걸 함 ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
+        _boxContents.forEach(function(i, index) {
+            
+            if(_scroll > posY[index] ) {
+
+                // if 문 사용할 때, 중괄호가 없으면 > 바로 밑의 줄 코드의 여부만 적용시킬 수 있음. ⭐⭐⭐⭐⭐⭐⭐⭐ 
+                    // 한줄만 조건처리 ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ 
+                // 해당 클래스가 '없으면!!!!!'
+                if(!i.classList.contains("is-active"))
+                    i.classList.add("is-active");
+                
+            } else {
+                i.classList.remove("is-active");
+                    // 스크롤을 위로 올리면 > 떼어버리는거 
+            }
+            
+
+        })
+    }
+
+    window.onresize = function() {
+        
+        // 브라우저 사이즈 면하면 > 높이 찍어
+        console.log(window.innerHeight)
+    }
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+</html>
