@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todo리스트</title>
+</head>
+
+
+<style>
+
+    /* 이건 지금, createElement 로 추가하는 거?  */
+    li {
+        width: 800px;
+        height: 80px;
+    }
+
+    li > div {
+        width: 150px;
+        height: 80px;
+
+        border: 1px solid;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+    .test {
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+    }
+    
+    
+    
+    .delBtn0{
+        
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+
+    }
+    
+    .delBtn1{
+        
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+
+    }
+
+</style>
+
+
+
+<body>
+
+
+    <!-- input & label -->
+    <label for=""> 할일 </label>
+    <input type="text" >
+    
+    <label for=""> 설명 </label>
+    <input type="text">
+    
+    <label for=""> 완료했니 </label>
+    <input type="text">
+    
+    <label for=""> 피드백 </label>
+    <input type="text">
+
+
+    <!-- 삭제 할지 여부 check box 
+            display : none -->
+    <!-- <label for=""> 삭제 </label> -->
+    <input style="display: none;" type="radio">
+
+        
+    <!-- button  -->
+    <button id="addBtn"> 추가✅ </button>
+
+
+
+    <!-- _div 만들기 -->
+    <div id="_div"> 
+
+    </div>
+
+
+
+</body>
+
+<script>
+
+// 🟦 JSON 파일 문자열 다루기 
+
+    // JSON 이란? 
+        // [특징]
+            // 객체 처럼 생김. 
+        
+        // [필요성]
+            // 전제 : 데이터를 '문자열' 로 받음 
+            // 따라서, 받은 '문자열' 을 '객체' 로 변환해서 쓸 때, JSON 을 사용함. 
+            // 즉, 궁극적으로, '객체' 로 변환해서 사용하기 위해서 
+
+        // [예시]
+        // let _json = '{ "key" : "value" }'
+        // console.log(_json)
+
+
+    // 🔷 'key value 형태로 된 문자열'를 '객체'로 바꿔주려면? 
+        // 'parse 메소드' 사용 ⭐⭐ 
+        // console.log(JSON.parse(_json))
+            // [해석]
+                // 'key : value 형태로 된 문자열'을 'input' 하면 > '객체' 로 만들어줌 
+                // 다만, '형식' 은 '객체' 처럼 보여야 함
+                    // 즉, '그냥 줄글' 이 아니라, 'key : value' 의 형태 여야 함. 
+
+    // 🔷 '객체' 를 '문자열' 로 바꾸려면? 
+        // stringify 메소드 사용
+        let obj = {key : 24};
+        console.log(JSON.stringify(obj))
+        
+
+
+// 📘 [실습 과제] To Do list 만들기 
+
+// 🟦 [초기화] local storage 를 초기화 해야 > 기존에 set Item 으로 저장되었던게 사라짐. 
+    window.localStorage.clear();
+    // [궁금한 것 1]
+        // 지금 로컬 스토리지가 어디에 저장되는거지? 
+            // 로컬 스토리지는 실제로 '개발자 도구 > application > local storage' 에 저장 된다. 
+    
+
+// 🟦 전역변수 모음 
+let _json = { };
+
+    // 구체적으로 어떤 count 인지 확인 📛📛📛  
+let count = 0; 
+
+
+
+// 🟦 eventlistener 로 듣고 있다가, '버튼' 눌렀을 때, 실행되는 함수 만들기 
+
+    function addList() {
+
+
+    // 🔷 사용자가 기록한 data 가져오기 
+
+        // 1. 지금 당장 적은 것, 가져오기 
+            // eventlistener 로 듣고 있다가 > 버튼이 클릭되면 > 위에 있는 'input 태그' 를 모두 가져온다. 
+                let inputs = document.querySelectorAll("input");
+
+        // 2. 예전에 적은 것, local storage 에서 가져오기 
+            // local storage 에 저장된 '게시판' key 로, value 가져오기
+            let value = window.localStorage.getItem("게시판");
+                // [해석]
+                    // local storage 에 저장된 값을 가져오려면? 
+                        // window.localStorage.getItem("key 값을 입력"); 
+                        // 그러면, output 으로 key 에 상응하는 'value' 를 내어준다. 
+
+                // [해석]
+                    // 이게 존재하는 이유는 
+                        // 1) 이미 게시판에 저장된 데이터가 있는지 확인하고 
+                        // 2) 있다면 > 기존 데이터를 누적해서 그리고  
+                        // 3) 없다면 > 새로이 그리기 위해서
+                    
+                
+                // [궁금증] 
+                    // 이 순간 아무것도 없잖아? 그치? 그러면, undefined 이 나오나? ❓❓❓❓❓ 
+                        console.log(value + "지금 게시판에 아무것도 없어서, undefined 가 나와야 한다?")
+                        // [콘솔 결과] 
+                            // 1) '게시판' key 에 value 가 '이미 있으면' > 있는게 찍히고 
+                            // 2) 게시판에 아무것도 없으면 > null 로 나옴. 
+
+                // [처음에 했던 궁금증]
+                    // '게시판' 이라는 'key' 를 눌렀을 때 > 해당 key 에 있는 value 가 가져와진다. 
+                    // 근데, 이 값이 setItem 된게 밑에 있는데? 왜 작동하는거지? ❓❓❓❓❓❓❓❓❓❓❓  
+
+
+        // [초기화]
+            // window.localStorage.clear();
+                // [궁금증] 
+                    // 여기에서 초기화 하는게 > 실익이 있나?  
+                    // 음... 여기를 주석 처리해도 잘 작동하긴 하는데, 혹시 모르니까, 남겨두자. 
+
+
+    // 🔷 가져온 데이터를 저장하기 
+
+    // 🔷 local storage 에 아무것도 없으면 > input 태그를 통해 들어온 걸로, setItem 활용해서 로컬스토리지에 저장한다. 
+            // [주의할 것]
+                // setItem 안에 넣을 때, 전부 다 " " 로 감싸야 한다. ⭐⭐⭐ > 그래야, 한글, 영어, 모두 다 렌더되게 된다. 
+        if (window.localStorage.length == 0) {
+            window.localStorage.setItem("게시판" , `{ "task" : "${inputs[0].value}" , "desc" : "${inputs[1].value}" , "done" : "${inputs[2].value}" , "feedback" : "${inputs[3].value}" , "delete" : "${inputs[4].value}"   }`  );
+        } else {
+            // 기존에 있는 걸 다 value 로 다 가져온다 > 그리고 | 를 더해주고 > input 에 있는 걸 추가 한다❓❓❓ 맞나? ❓❓❓ 
+                // 여기에 '새롭게 추가되면 > | 를 넣어준다.'
+            window.localStorage.setItem("게시판", value + "|" + `{ "task" : "${inputs[0].value}" , "desc" : "${inputs[1].value}" , "done" : "${inputs[2].value}" , "feedback" : "${inputs[3].value}" , "delete" : "${inputs[4].value}" }` )
+        }
+            // [해석]
+                // local storage 에 아무것도 없으면 > local storage 에 다가, key 랑 value 형태로 데이터를 넣는다.
+                // 넣을 때 
+                    // 1) key : value 형태 여야 한다는 것 -> local storage 의 특징❓❓❓  
+                    // 2) 여기에서는 또 value 를 {객체} 형태로 넣었다. -> 내가 객체 형태로 넣고 싶어서❓❓❓
+
+        console.log(window.localStorage.getItem('게시판') + "잘 들어오고 있니🕵️‍♂️");
+        // 보여줘야 할 게시판 데이터가 잘 들어오고 있는지 확인
+        // 콘솔로 찍으면서, 하나 하나 확인하는게 필요함
+            // [문제]
+                // 음... 안 보이는데, render 가 있어야 보이나? ❓❓❓ 
+                // `addBtn.addEventListener("click",addList);` 버튼에 addList 함수를 달아줬어야 했음 🔵
+
+
+        render();    
+        
+    }
+
+
+    // id 부여해주려고, coount 가 쓰임
+    // let count = 0; 
+
+    // 전역변수로 만들어서 사용할 것임. 
+        // _json 변수가 쓰이는 곳
+    // let _json
+
+    function render() {
+        
+        // 게시판 데이터를 가지고 온다. > 이걸 _json 변수에 넣어준다. 
+
+        _json = window.localStorage.getItem('게시판');
+        console.log(_json)
+
+        // 문자열에서 "|" 문자열마다 잘라서, 배열로 변경, 
+        // 근데, | 이 문자열이 없지 않나? 근데 왜 이걸 지우는거지? 
+            // 다음 할일을 만들 때, | 이게 추가된다고 함. 
+        _json = _json.split("|")
+            // 이게 ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+            // 이게 off 되면 > | 이게 남아있고 > 배열값 마다, 돌아보는게 힘들어진다? 
+
+        console.log(_json + " | 을 split한 문자열이 있는 _json")
+
+
+        // 위에 id 를 _div 로 준게 있음? 그건가? ❓❓❓❓❓  
+        // 그릴 때 마다, 이전에 그렸던걸 지우는 곳 같은데? 
+        _div.innerHTML = " ";
+
+        let _ul = document.createElement("ul");
+        let _li = document.createElement("li");
+
+        let _div1 = document.createElement("div");
+        let _div2 = document.createElement("div");
+        let _div3 = document.createElement("div");
+        let _div4 = document.createElement("div");
+        let _div5 = document.createElement("button");
+
+        // 이게 지금 어디로 들어가는 거지❓❓ 
+        _div1.innerHTML = "할일";
+        _div2.innerHTML = "내용설명";
+        _div3.innerHTML = "완료여부";
+        _div4.innerHTML = "피드백";
+        _div5.innerHTML = "삭제할까?";
+
+
+
+        // 정렬
+        _li.style.display = "flex";
+
+        _li.append(_div1, _div2, _div3, _div4, _div5);
+        _ul.append(_li);
+
+        _json.forEach(function(i) {
+
+
+            count ++
+
+            // 위에서 해준거 같은데, 왜 또 하지❓❓❓ 
+                // json 에서 가져온 것들 마다, 여러개가 있으면, 다 해주겠다는 말 인가? 
+            let _li = document.createElement("li");
+            let _div1 = document.createElement("div");
+            let _div2 = document.createElement("div");
+            let _div3 = document.createElement("div");
+            let _div4 = document.createElement("div");
+            let _div5 = document.createElement("button");
+
+
+            // class 생성 , id 생성 ⭐⭐⭐ ⭐⭐⭐⭐⭐ 
+            // 작동하는지 테스트해봄
+            _div5.setAttribute('onclick' , 'hearing()')
+
+            // 클릭된거 > id 추출해서 가져오기 ⭐⭐⭐⭐⭐⭐ 
+            _div5.setAttribute('onclick' , 'delButton(this.id)')
+
+            _div5.classList.add('delBtn');
+            
+            // 버튼별로 유니크한 id 부여 ⭐⭐⭐⭐⭐⭐ 
+            _div5.id = `hello${count}`;
+
+            _li.id = `li_${count}`; 
+
+
+
+            // 이걸 하면 어케 되지? 아까, 문자열이, '객체' 가 되지. 
+                // 그 객체 중에서 name 키에 해당하는 value 를 _div1 에 넣는다! 라는 것. 
+                // 130 line 에서 값을 딕트 형태로 넣을 때, 쓴 key 값을 주목해볼 것 
+            _div1.innerHTML = JSON.parse(i).task;
+            _div2.innerHTML = JSON.parse(i).desc;
+            _div3.innerHTML = JSON.parse(i).done;
+            _div4.innerHTML = JSON.parse(i).feedback;
+            _div5.innerHTML = JSON.parse(i).delete;
+
+
+
+
+            _li.style.display = "flex"; 
+
+            _li.append(_div1, _div2, _div3, _div4, _div5);
+            _ul.append(_li);
+
+        })
+
+        _div.append(_ul)
+
+    }
+
+
+    if (window.localStorage.length != 0) {
+        render();
+    }
+
+
+
+    // 없어지는 함수 만들기
+    function delList () {
+
+        
+        console.log("🕵️‍♂️json 데이터 보기")
+        console.log(window.localStorage.getItem('게시판'))
+        _json = window.localStorage.getItem('게시판')
+        _json = _json.split("|")
+
+        _json.forEach(function(i) {
+            
+                // 버튼별로 고유한 id 를 주고 싶어 ⭐⭐⭐⭐⭐⭐ 
+                // document.querySelector('button').id = 'delBtn';
+
+                // let checkTest = document.querySelector('button');
+                // console.log(checkTest + "여기!✅")
+                // checkTest.className = 'test'
+                // checkTest.setAttribute('checked',true);
+
+                // 해당 id 버튼이 클릭되면 > 그것만 빼고 > 다시 그리고 싶어 
+        })
+    }    
+
+    function hearing() {
+        console.log("지금, delBtn, 클릭된거 들린다.⭐⭐⭐⭐⭐⭐ ")
+        
+        // console.log(this)///
+    }
+
+
+    // 클릭된 버튼의 id 를 받아와서 > 부모 태그인 li 를 찾고 > li 를 삭제 ⭐⭐⭐⭐⭐⭐  
+    function delButton(click_id) {
+
+        console.log(click_id)
+
+        // 해당 id 의 부모 태그 찾기 
+        let target_btn = document.getElementById(click_id);
+
+        // console.log(target_btn + "⭐⭐⭐⭐⭐ ")
+        let target_li = target_btn.parentNode
+
+        target_li.remove();
+
+    }
+
+    
+
+    // 해당 버튼이 클릭되면 > addList 함수 실행
+    addBtn.addEventListener("click", addList);
+    
+    
+    
+    // 삭제 버튼이 클릭되면 > 함수 실행 ✅ 
+    // delBtn.addEventListener("click", delList);
+    
+    // hello0.addEventListener("click", hearing);
+    // hello1.addEventListener("click", hearing);
+    
+    
+
+
+</script>
+
+</html>
