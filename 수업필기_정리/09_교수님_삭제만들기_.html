@@ -51,16 +51,19 @@
     // 객체를 문자열로 변환
     // stringify : 객체를 문자열로 변환
     console.log(JSON.stringify(obj));
-
-
+    
+    
     // window.localStorage.clear();
-
+    
+    
     function addList(){
         let inputs = document.querySelectorAll("input");
         let value = window.localStorage.getItem("게시판");
         // window.localStorage.clear();
-        if(window.localStorage.length == 0){
-            window.localStorage.setItem("게시판",`{"name" : "${inputs[0].value}", "age" : "${inputs[1].value}"", "content" : "${inputs[2].value}"", "tel" : "${inputs[3].value}" }`);
+
+        // 0 개 이거나, 게시판이 빈 문자열 이거나! 그때에 그린다. ⭐⭐⭐ > 이걸 해야 지웠을 때, 안 터진다. 
+        if(window.localStorage.length == 0 || window.localStorage.getItem('게시판') == "" ){
+            window.localStorage.setItem("게시판",`{"name" : "${inputs[0].value}", "age" : "${inputs[1].value}", "content" : "${inputs[2].value}", "tel" : "${inputs[3].value}" }`);
         }else{
             window.localStorage.setItem("게시판",value + "|" + `{"name" : "${inputs[0].value}", "age" : "${inputs[1].value}", "content" : "${inputs[2].value}", "tel" : "${inputs[3].value}" }`);
         }
@@ -68,14 +71,22 @@
         // 문자열을 객체로 변환
         // let _json = JSON.parse(window.localStorage.getItem("게시판"));
         // console.log(_json);
+        render();
     }
 
     function render(){
+
+    // 계속 터지니까 위치를 이쪽으로 이동 / 삭제하고, 
+    if(window.localStorage.length != 0 || window.localStorage.getItem("게시판") != "")
+    {
+        return;
+    }
+   
+
         let _json = window.localStorage.getItem('게시판');
         // 문자열에서 "|" 문자열마다 잘라서 배열로 변경
         _json = _json.split("|");
         console.log(_json);
-
         _div.innerHTML = "";
 
         let _ul = document.createElement("ul");
@@ -84,35 +95,88 @@
         let _div2 = document.createElement("div");
         let _div3 = document.createElement("div");
         let _div4 = document.createElement("div");
+        let _div5 = document.createElement("div");
+
+
+
+
         _div1.innerHTML = "이름";
         _div2.innerHTML = "나이";
         _div3.innerHTML = "취미";
         _div4.innerHTML = "전화번호";
+        _div5.innerHTML = "삭제";
+        
+        
         _li.style.display = "flex";
-        _li.append(_div1,_div2,_div3,_div4);
+        _li.append(_div1,_div2,_div3,_div4, _div5);
         _ul.append(_li);
-        _json.forEach(function(i){
+
+        // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ 
+            // 0번을 비웠는데, 0번이 있으면 한번 돌아감. 
+            // 빈 문자열인데 parse 하라고 하니까 > 오류난거고 
+            // 빈 문자열이면, 그냥, return 해라. 
+            // 빈 문자열 하나가, 0번 인덱스에 있어서, 0번 인덱스가 빈 문자열이면, return 시킨다. 
+        if(_json[0] == "") {
+            return;
+        }
+
+        _json.forEach(function(i, index){
             let _li = document.createElement("li");
             let _div1 = document.createElement("div");
             let _div2 = document.createElement("div");
             let _div3 = document.createElement("div");
             let _div4 = document.createElement("div");
+            let _div5 = document.createElement("div");
+            let _button = document.createElement("button");
+            _button.innerHTML = "삭제";
+
+            console.log("여기니?")
+
             _div1.innerHTML = JSON.parse(i).name;
             _div2.innerHTML = JSON.parse(i).age;
             _div3.innerHTML = JSON.parse(i).content;
             _div4.innerHTML = JSON.parse(i).tel;
+            _div5.append(_button);
+
+            _button.onclick = function() {
+                
+                // splice, 배열에서 제거, 하는 놈. 
+                    // 첫 번째 매개변수 : 인덱스 
+                    // 두 번째 매개변수 : 제거할 개수 
+                _json.splice(index, 1)
+                    // 해당 인덱스를 찾아서 1개를 제거
+                console.log(_json);
+                    // 여기서 보면 삭제 되는 걸 확인 할 수 있음. 
+
+                // | 문자로 나웠음. 배열을 문자열로 바꾸면서 인덱스 마다 구분하는 문자를 정해주는 메소드 
+                console.log(_json.join('|')) 
+                    // 컴마가 > | 로 바뀌면서 > 객체로 변환함 
+
+                // 위에서 변환한 '객체' 를 게시판에 넣는다. ⭐⭐⭐ 
+                window.localStorage.setItem('게시판', _json.join('|') )
+
+                // 다시 그린다. 
+                render();
+
+            }
+
             _li.style.display = "flex";
-            _li.append(_div1,_div2,_div3,_div4);
+            _li.append(_div1,_div2,_div3,_div4, _div5);
+            // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ 이걸 해줬어야 
+            // 버튼 깔끔하게는 못 했어 
+
+
             _ul.append(_li);
         })
         _div.append(_ul);
     }
 
-    if(window.localStorage.length != 0)
+    // 빈문자열이 아니면 > 그릴 필요가 없으니까 > 빈 문자열이 아닌 조건을 추가 ⭐⭐⭐⭐⭐ 
+    if(window.localStorage.length != 0 && window.localStorage.getItem("게시판") != "")
     {
         render();
     }
-
+    
     addBtn.addEventListener("click",addList);
 </script>
 </html>
